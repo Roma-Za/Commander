@@ -5,15 +5,15 @@ import java.util.ArrayList;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.webkit.MimeTypeMap;
+import android.widget.*;
 
 public class AppMainActivity extends ListActivity {
     private ArrayList<String> directoryEntries = new ArrayList<String>();
@@ -23,6 +23,20 @@ public class AppMainActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
        browseTo(new File("/"));
+
+       ListView lv = getListView();
+        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+            public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+                                           int pos, long id) {
+
+                Toast toast = Toast.makeText(getApplicationContext(),
+                        "контекстное меню!", Toast.LENGTH_SHORT);
+                toast.show();
+
+                return true;
+            }
+        });
     }
 
     private void upOneLevel(){
@@ -32,31 +46,35 @@ public class AppMainActivity extends ListActivity {
     }
 
     private void browseTo(final File aDirectory){
-        //if we want to browse directory
         if (aDirectory.isDirectory()){
-            //fill list with files from this directory
             currentDirectory = aDirectory;
             fill(aDirectory.listFiles());
-
-            //set titleManager text
             TextView titleManager = (TextView) findViewById(R.id.titleManager);
             titleManager.setText(aDirectory.getAbsolutePath());
         } else {
-            //if we want to open file, show this dialog:
-            //listener when YES button clicked
             OnClickListener okButtonListener = new OnClickListener(){
                 public void onClick(DialogInterface arg0, int arg1) {
-                    //intent to navigate file
-                    Intent i = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse("file://" + aDirectory.getAbsolutePath()));
-                    //start this activity
-                    startActivity(i);
+
+                    String mime = get_mime_by_filename(aDirectory.getAbsolutePath());
+                    Intent intent1 = new Intent();
+                    intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent1.setAction(android.content.Intent.ACTION_VIEW);
+
+                    intent1.setDataAndType(Uri.fromFile(new File(aDirectory
+                            .getAbsolutePath())), mime);
+
+                    try {
+                        startActivity(intent1);
+                    } catch (ActivityNotFoundException e) {
+
+                        Toast.makeText(getApplicationContext(),
+                                "Couldn't open: unknown file type",
+                                Toast.LENGTH_SHORT).show();
+                    }
                 }
             };
-            //listener when NO button clicked
             OnClickListener cancelButtonListener = new OnClickListener() {
                 public void onClick(DialogInterface arg0, int arg1) {
-                    //do nothing
-                    //or add something you want
                 }
             };
 
@@ -109,5 +127,20 @@ public class AppMainActivity extends ListActivity {
             if (clickedFile != null)
                  browseTo(clickedFile);
         }
+    }
+    public String get_mime_by_filename(String filename){
+        String ext;
+        String type;
+
+        int lastdot = filename.lastIndexOf(".");
+        if(lastdot > 0){
+            ext = filename.substring(lastdot + 1);
+            MimeTypeMap mime = MimeTypeMap.getSingleton();
+            type = mime.getMimeTypeFromExtension(ext);
+            if(type != null) {
+                return type;
+            }
+        }
+        return "application/octet-stream";
     }
 }
