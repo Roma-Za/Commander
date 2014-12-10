@@ -125,17 +125,13 @@ public class AppMainActivity extends ListActivity {
     }
     private long getDirectoryLength(File f){
         long sum = 0;
-        if(f.isFile()) {
-            return f.length();
-        }else{
+        if(f.isDirectory()) {
             File[] arrPath = f.listFiles();
-            if(arrPath.length > 0) {
-                for (File file : arrPath) {
+            if(arrPath.length > 0)
+                for (File file : arrPath)
                     sum += getDirectoryLength(file);
-                }
-            }else{
-                return sum;
-            }
+        }else{
+           sum += f.length();
         }
         return  sum;
     }
