@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
 import android.view.*;
 import android.webkit.MimeTypeMap;
 import android.widget.*;
@@ -138,11 +139,11 @@ public class AppMainActivity extends ListActivity {
         }
         return  sum;
     }
-    private void delOllInDirectory(File f){
+    private void delDirectory(File f){
         if (f.isDirectory()) {
             File[] arrPath = f.listFiles();
             for (File file : arrPath)
-                delOllInDirectory(file);
+                delDirectory(file);
             f.delete();
         } else f.delete();
     }
@@ -185,10 +186,9 @@ public class AppMainActivity extends ListActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item)
     {
-        File f = new File(directoryEntries.get(position));
+        final File f = new File(directoryEntries.get(position));
         switch (item.getItemId())
         {
-
             case IDM_OPEN:
                 browseTo(f);
                 break;
@@ -202,28 +202,63 @@ public class AppMainActivity extends ListActivity {
 
                 break;
             case IDM_DELETE:
-                    if(f.isFile()){
+
+                OnClickListener okButtonListener = new OnClickListener(){
+                    public void onClick(DialogInterface arg0, int arg1) {
+
                         File temp = f.getParentFile();
-                        boolean isDel = f.delete();
-                        browseTo(temp);
-                        Toast.makeText(getApplicationContext(),
-                                "удаление - " + isDel,
-                                Toast.LENGTH_SHORT).show();
-                    }else{
-                        File temp = f.getParentFile();
-                        delOllInDirectory(f);
+                        delDirectory(f);
                         browseTo(temp);
                     }
+
+                };
+                OnClickListener cancelButtonListener = new OnClickListener() {
+                    public void onClick(DialogInterface arg0, int arg1) {
+
+                    }
+                };
+
+                new AlertDialog.Builder(this)
+                        .setTitle("Подтверждение")
+                        .setMessage("Хотите удалить " + f.getName() + "?")
+                        .setPositiveButton("Да", okButtonListener)
+                        .setNegativeButton("Нет", cancelButtonListener)
+                        .show();
                 break;
             case IDM_RENAME:
-               // f.renameTo(File newPath)
+
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                alert.setTitle("Заголовок");
+                alert.setMessage("Сообщение");
+                final EditText input = new EditText(this);
+                input.setText(f.getName());
+                alert.setView(input);
+
+                alert.setPositiveButton("ОК", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        String value = input.getText().toString();
+                        String temp = f.getParent();
+                         f.renameTo(new File(temp + "/" + value));
+                        browseTo(new File(temp));
+                    }
+                });
+
+                alert.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        Toast.makeText(getApplicationContext(),
+                                "ок, отмена ",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                alert.show();
+
                 break;
             case IDM_INFO:
-
-                if(f.isFile()) {
                     new AlertDialog.Builder(this)
                             .setTitle("Информация")
-                            .setMessage("тип: файл" +
+                            .setMessage("тип: " +
+                                            (f.isFile()?"Файл":"Папка") +
                                             "\nабсолютный путь: \n" +
                                             f.getAbsolutePath() +
                                             "\nдоступно для чтения: " +
@@ -233,32 +268,8 @@ public class AppMainActivity extends ListActivity {
                                             "\nскрытый: " +
                                             (f.isHidden() ? "да" : "нет") +
                                             "\nразмер: " +
-                                            f.length()/1024f/1024f + "MB" +
-                                            "\nдата последней модификации: " +
-                                            new Date(f.lastModified()).toString()
-
-                            )
-                            .setCancelable(false)
-                            .setNegativeButton("ОК",
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            dialog.cancel();
-                                        }
-                                    })
-                            .show();
-                }else{
-                    new AlertDialog.Builder(this)
-                            .setTitle("Информация")
-                            .setMessage("тип: каталог" +
-                                            "\nабсолютный путь: \n" +
-                                            f.getAbsolutePath() +
-                                            "\nдоступно для чтения: " +
-                                            (f.canRead() ? "да" : "нет") +
-                                            "\nскрытый: " +
-                                            (f.isHidden() ? "да" : "нет") +
-                                            "\nразмер: " +
                                             getDirectoryLength(f)/1024f/1024f + "MB" +
-                                            "\nдата последней модификации: " +
+                                            "\nдата последней модификации: \n" +
                                             new Date(f.lastModified()).toString()
                             )
                             .setCancelable(false)
@@ -269,7 +280,6 @@ public class AppMainActivity extends ListActivity {
                                         }
                                     })
                             .show();
-                }
                 break;
             default:
                 return super.onContextItemSelected(item);
