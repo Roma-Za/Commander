@@ -122,7 +122,7 @@ public class AppMainActivity extends ListActivity {
                  browseTo(clickedFile);
         }
     }
-    public long getDirectoryLength(File f){
+    private long getDirectoryLength(File f){
         long sum = 0;
         if(f.isFile()) {
             return f.length();
@@ -137,6 +137,14 @@ public class AppMainActivity extends ListActivity {
             }
         }
         return  sum;
+    }
+    private void delOllInDirectory(File f){
+        if (f.isDirectory()) {
+            File[] arrPath = f.listFiles();
+            for (File file : arrPath)
+                delOllInDirectory(file);
+            f.delete();
+        } else f.delete();
     }
     public String get_mime_by_filename(String filename){
         String ext;
@@ -194,7 +202,18 @@ public class AppMainActivity extends ListActivity {
 
                 break;
             case IDM_DELETE:
-
+                    if(f.isFile()){
+                        File temp = f.getParentFile();
+                        boolean isDel = f.delete();
+                        browseTo(temp);
+                        Toast.makeText(getApplicationContext(),
+                                "удаление - " + isDel,
+                                Toast.LENGTH_SHORT).show();
+                    }else{
+                        File temp = f.getParentFile();
+                        delOllInDirectory(f);
+                        browseTo(temp);
+                    }
                 break;
             case IDM_RENAME:
                // f.renameTo(File newPath)
