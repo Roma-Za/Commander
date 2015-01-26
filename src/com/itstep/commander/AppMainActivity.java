@@ -2,6 +2,8 @@ package com.itstep.commander;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedList;
+
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.ActivityNotFoundException;
@@ -26,7 +28,9 @@ public class AppMainActivity extends ListActivity {
     private static final int IDM_PASTE = 104;
     private static final int IDM_DELETE = 105;
     private static final int IDM_RENAME = 106;
-    private static final int IDM_INFO = 107;
+    private static final int IDM_NEW = 107;
+    private static final int IDM_INFO = 108;
+
     private int position;
     private String PathFrom = "";
     private Boolean isCopy = true;
@@ -44,12 +48,6 @@ public class AppMainActivity extends ListActivity {
 
         mSettings = getSharedPreferences(PREFS_NAME, 0);
 
-        //////////
-
-        SharedPreferences.Editor editor = mSettings.edit();
-        editor.putBoolean(PREFS_HIDDEN, isShowHidden);
-        editor.apply();
-        /////////
         if(mSettings.contains(PREFS_HIDDEN)) {
             isShowHidden = mSettings.getBoolean(PREFS_HIDDEN, false);
         }
@@ -198,6 +196,7 @@ public class AppMainActivity extends ListActivity {
         menu.add(Menu.NONE, IDM_PASTE, Menu.NONE, "Вставить");
         menu.add(Menu.NONE, IDM_DELETE, Menu.NONE, "Удалить");
         menu.add(Menu.NONE, IDM_RENAME, Menu.NONE, "Переименовать");
+        menu.add(Menu.NONE, IDM_NEW, Menu.NONE, "Новая папка");
         menu.add(Menu.NONE, IDM_INFO, Menu.NONE, "Инфо");
         menu.setHeaderTitle("Меню");
     }
@@ -252,7 +251,9 @@ public class AppMainActivity extends ListActivity {
                         };
                         OnClickListener cancelButtonListener = new OnClickListener() {
                             public void onClick(DialogInterface arg0, int arg1) {
-
+                                Toast.makeText(getApplicationContext(),
+                                        "ок, отмена ",
+                                        Toast.LENGTH_SHORT).show();
                             }
                         };
 
@@ -292,6 +293,55 @@ public class AppMainActivity extends ListActivity {
                         alert.show();
                     }
                     break;
+                case IDM_NEW:
+                    AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                    alert.setTitle("Создать папку с именем:");
+                    final EditText input = new EditText(this);
+                    alert.setView(input);
+
+                    alert.setPositiveButton("ОК", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    String value = input.getText().toString();
+                                    if (isTrueName(value, f)) {
+                                        if (f.isDirectory()) {
+                                            FileManager fm = new FileManager();
+                                            if (!fm.newFolder(f, value)) {
+                                                Toast.makeText(getApplicationContext(),
+                                                        "Не удалось создать папку",
+                                                        Toast.LENGTH_SHORT).show();
+                                            }
+                                            browseTo(f);
+                                        } else {
+                                            File PF = f.getParentFile();
+                                            if (isTrueName(value, PF)) {
+                                                FileManager fm = new FileManager();
+                                                if (!fm.newFolder(PF, value)) {
+                                                    Toast.makeText(getApplicationContext(),
+                                                            "Не удалось создать папку",
+                                                            Toast.LENGTH_SHORT).show();
+                                                }
+                                                browseTo(PF);
+                                            }
+                                        }
+                                    } else {
+                                        Toast.makeText(getApplicationContext(),
+                                                "Имя не подходит",
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                    });
+
+                    alert.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            Toast.makeText(getApplicationContext(),
+                                    "ок, отмена ",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    alert.show();
+
+                    break;
                 case IDM_INFO:
                     new AlertDialog.Builder(this)
                             .setTitle("Информация")
@@ -312,6 +362,18 @@ public class AppMainActivity extends ListActivity {
         return true;
     }
 
+    private boolean isTrueName(String value, File f) {
+        if(f.isFile()) f = f.getParentFile();
+        String [] names = f.list();
+        for (String s : names){
+          if(s.equals(value)) {
+              return false;
+          }
+        }
+
+        return  true;
+    }
+
     @Override
     public boolean onKeyDown(int keycode, KeyEvent event) {
       if(keycode == KeyEvent.KEYCODE_BACK && !currentDirectory.getAbsolutePath().equals("/storage")) {
@@ -322,11 +384,80 @@ public class AppMainActivity extends ListActivity {
           finish();
 
           return false;
-      }else  if(keycode == KeyEvent.KEYCODE_MENU){
-
-          return  true;
       }
         return false;
     }
 
+    private int group1Id = 1;
+
+    int searchId = Menu.FIRST;
+    int hiddenId = Menu.FIRST +1;
+    int themeId = Menu.FIRST +2;
+    int aboutId = Menu.FIRST +3;
+    int exitId = Menu.FIRST +4;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(group1Id, searchId, searchId, "Поиск");
+        menu.add(group1Id, hiddenId, hiddenId, "Скрытые файлы");
+        menu.add(group1Id, themeId, themeId, "Темы");
+        menu.add(group1Id, aboutId, aboutId, "О программе");
+        menu.add(group1Id, exitId, exitId, "Выход");
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+
+            case 1:
+
+                return true;
+
+            case 2:
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                alert.setTitle("Показывать скрытые файлы?");
+                alert.setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        setHiddenFlag(true);
+                    }
+                });
+
+                alert.setNegativeButton("Нет", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        setHiddenFlag(false);
+                    }
+                });
+
+                alert.show();
+                return true;
+
+            case 3:
+
+                return true;
+
+            case 4:
+
+                return true;
+
+            case 5:
+                finish();
+                return true;
+            default:
+                break;
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void setHiddenFlag(Boolean flag) {
+        isShowHidden = flag;
+
+        SharedPreferences.Editor editor = mSettings.edit();
+        editor.putBoolean(PREFS_HIDDEN, isShowHidden);
+        editor.apply();
+        browseTo(currentDirectory);
+    }
 }

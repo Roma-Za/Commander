@@ -1,7 +1,5 @@
 package com.itstep.commander;
 
-import android.os.Environment;
-import android.os.StatFs;
 import android.util.Log;
 
 import java.io.*;
@@ -151,6 +149,17 @@ public class FileManager {
 
         } else if(!temp_dir.canWrite())
             Log.e("canWrite", "Не для записи");
+
+    }
+    public Boolean newFolder(File target, String name){
+        File f = new File(target.getAbsolutePath() + "/" + name);
+        try {
+            f.mkdirs();
+            return true;
+        }
+        catch (Exception e){
+            return false;
+        }
 
     }
 }
