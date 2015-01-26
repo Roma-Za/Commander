@@ -2,17 +2,15 @@ package com.itstep.commander;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
-
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.Editable;
 import android.view.*;
 import android.webkit.MimeTypeMap;
 import android.widget.*;
@@ -20,7 +18,8 @@ import android.widget.*;
 public class AppMainActivity extends ListActivity {
 
     private ArrayList<String> directoryEntries = new ArrayList<String>();
-    private File currentDirectory = new File("/");
+    private File startDirectory = new File("storage");
+    private File currentDirectory = startDirectory;
     private static final int IDM_OPEN = 101;
     private static final int IDM_COPY = 102;
     private static final int IDM_CUT = 103;
@@ -29,15 +28,50 @@ public class AppMainActivity extends ListActivity {
     private static final int IDM_RENAME = 106;
     private static final int IDM_INFO = 107;
     private int position;
-
+    private String PathFrom = "";
+    private Boolean isCopy = true;
+    private SharedPreferences mSettings;
+    private static final String PREFS_NAME = "ManagerPrefsFile";
+    private static final String PREFS_HIDDEN = "hidden";
+    private Boolean isShowHidden = false;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-       browseTo(new File("/"));
+
+        if(getLastNonConfigurationInstance()!=null)
+            currentDirectory = (File)getLastNonConfigurationInstance();
+
+        mSettings = getSharedPreferences(PREFS_NAME, 0);
+
+        //////////
+
+        SharedPreferences.Editor editor = mSettings.edit();
+        editor.putBoolean(PREFS_HIDDEN, isShowHidden);
+        editor.apply();
+        /////////
+        if(mSettings.contains(PREFS_HIDDEN)) {
+            isShowHidden = mSettings.getBoolean(PREFS_HIDDEN, false);
+        }
+
+       browseTo(currentDirectory);
 
        ListView lv = getListView();
         registerForContextMenu(lv);
+    }
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("isCopy", isCopy);
+        outState.putString("PathFrom", PathFrom);
+    }
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        isCopy = savedInstanceState.getBoolean("isCopy");
+        PathFrom = savedInstanceState.getString("PathFrom");
+    }
+
+    public Object onRetainNonConfigurationInstance() {
+        return currentDirectory;
     }
 
     private void upOneLevel(){
@@ -92,15 +126,23 @@ public class AppMainActivity extends ListActivity {
         ArrayList<String> names = new ArrayList<String>();
         directoryEntries.clear();
         names.clear();
-
-        if (currentDirectory.getParent() != null) {
+            if(currentDirectory.getParentFile() != null)
+            if(!((currentDirectory.getParent()).equals("/"))){
             directoryEntries.add("..");
             names.add("..");
-        }
+            }
 
         for (File file : files) {
-            directoryEntries.add(file.getAbsolutePath());
-            names.add(file.getName());
+
+                if(file.isHidden()){
+                    if(isShowHidden) {
+                        directoryEntries.add(file.getAbsolutePath());
+                        names.add(file.getName());
+                    }
+                }else{
+                    directoryEntries.add(file.getAbsolutePath());
+                    names.add(file.getName());
+                }
         }
 
         ArrayAdapter<String> directoryList = new ArrayAdapter<String>(this, R.layout.row, names);
@@ -123,26 +165,7 @@ public class AppMainActivity extends ListActivity {
                  browseTo(clickedFile);
         }
     }
-    private long getDirectoryLength(File f){
-        long sum = 0;
-        if(f.isDirectory()) {
-            File[] arrPath = f.listFiles();
-            if(arrPath.length > 0)
-                for (File file : arrPath)
-                    sum += getDirectoryLength(file);
-        }else{
-           sum += f.length();
-        }
-        return  sum;
-    }
-    private void delDirectory(File f){
-        if (f.isDirectory()) {
-            File[] arrPath = f.listFiles();
-            for (File file : arrPath)
-                delDirectory(file);
-            f.delete();
-        } else f.delete();
-    }
+
     public String get_mime_by_filename(String filename){
         String ext;
         String type;
@@ -182,92 +205,97 @@ public class AppMainActivity extends ListActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item)
     {
-        final File f = new File(directoryEntries.get(position));
-        switch (item.getItemId())
-        {
-            case IDM_OPEN:
-                browseTo(f);
-                break;
-            case IDM_COPY:
-
-                break;
-            case IDM_CUT:
-
-                break;
-            case IDM_PASTE:
-
-                break;
-            case IDM_DELETE:
-
-                OnClickListener okButtonListener = new OnClickListener(){
-                    public void onClick(DialogInterface arg0, int arg1) {
-
-                        File temp = f.getParentFile();
-                        delDirectory(f);
-                        browseTo(temp);
+        final String path = directoryEntries.get(position);
+        if(path!="..") {
+            final File f = new File(path);
+            switch (item.getItemId()) {
+                case IDM_OPEN:
+                    browseTo(f);
+                    break;
+                case IDM_COPY:
+                    if(!(path.equals("/storage/sdcard0")) && !(path.equals("/storage/sdcard1"))) {
+                        PathFrom = path;
+                        isCopy = true;
                     }
-
-                };
-                OnClickListener cancelButtonListener = new OnClickListener() {
-                    public void onClick(DialogInterface arg0, int arg1) {
-
+                    break;
+                case IDM_CUT:
+                    if(!(path.equals("/storage/sdcard0")) && !(path.equals("/storage/sdcard1"))) {
+                        PathFrom = path;
+                        isCopy = false;
                     }
-                };
-
-                new AlertDialog.Builder(this)
-                        .setTitle("Подтверждение")
-                        .setMessage("Хотите удалить " + f.getName() + "?")
-                        .setPositiveButton("Да", okButtonListener)
-                        .setNegativeButton("Нет", cancelButtonListener)
-                        .show();
-                break;
-            case IDM_RENAME:
-
-                AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Заголовок");
-                alert.setMessage("Сообщение");
-                final EditText input = new EditText(this);
-                input.setText(f.getName());
-                alert.setView(input);
-
-                alert.setPositiveButton("ОК", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        String value = input.getText().toString();
-                        String temp = f.getParent();
-                         f.renameTo(new File(temp + "/" + value));
-                        browseTo(new File(temp));
+                    break;
+                case IDM_PASTE:
+                    if(!(path.equals("/storage/sdcard0")) && !(path.equals("/storage/sdcard1"))) {
+                        FileManager fm = new FileManager();
+                        if (f.isDirectory()) {
+                            fm.paste(PathFrom, path);
+                            browseTo(f);
+                        } else {
+                            String p = f.getParent();
+                            fm.paste(PathFrom, p);
+                            browseTo(new File(p));
+                        }
+                        if (!isCopy) fm.delDirectory(new File(PathFrom));
                     }
-                });
+                    break;
+                case IDM_DELETE:
+                    if(!(path.equals("/storage/sdcard0")) && !(path.equals("/storage/sdcard1"))) {
+                        OnClickListener okButtonListener = new OnClickListener() {
+                            public void onClick(DialogInterface arg0, int arg1) {
 
-                alert.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(getApplicationContext(),
-                                "ок, отмена ",
-                                Toast.LENGTH_SHORT).show();
+                                File temp = f.getParentFile();
+                                FileManager fm = new FileManager();
+                                fm.delDirectory(f);
+                                browseTo(temp);
+                            }
+
+                        };
+                        OnClickListener cancelButtonListener = new OnClickListener() {
+                            public void onClick(DialogInterface arg0, int arg1) {
+
+                            }
+                        };
+
+                        new AlertDialog.Builder(this)
+                                .setTitle("Подтверждение")
+                                .setMessage("Хотите удалить " + f.getName() + "?")
+                                .setPositiveButton("Да", okButtonListener)
+                                .setNegativeButton("Нет", cancelButtonListener)
+                                .show();
                     }
-                });
+                    break;
+                case IDM_RENAME:
+                    if(!(path.equals("/storage/sdcard0")) && !(path.equals("/storage/sdcard1"))) {
+                        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                        alert.setTitle("Переименование");
+                        final EditText input = new EditText(this);
+                        input.setText(f.getName());
+                        alert.setView(input);
 
-                alert.show();
+                        alert.setPositiveButton("ОК", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                String value = input.getText().toString();
+                                String temp = f.getParent();
+                                f.renameTo(new File(temp + "/" + value));
+                                browseTo(new File(temp));
+                            }
+                        });
 
-                break;
-            case IDM_INFO:
+                        alert.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                Toast.makeText(getApplicationContext(),
+                                        "ок, отмена ",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+                        alert.show();
+                    }
+                    break;
+                case IDM_INFO:
                     new AlertDialog.Builder(this)
                             .setTitle("Информация")
-                            .setMessage("тип: " +
-                                            (f.isFile()?"Файл":"Папка") +
-                                            "\nабсолютный путь: \n" +
-                                            f.getAbsolutePath() +
-                                            "\nдоступно для чтения: " +
-                                            (f.canRead() ? "да" : "нет") +
-                                            "\nдоступно для записи: " +
-                                            (f.canWrite() ? "да" : "нет") +
-                                            "\nскрытый: " +
-                                            (f.isHidden() ? "да" : "нет") +
-                                            "\nразмер: " +
-                                            getDirectoryLength(f)/1024f/1024f + "MB" +
-                                            "\nдата последней модификации: \n" +
-                                            new Date(f.lastModified()).toString()
-                            )
+                            .setMessage(new FileManager().getInfo(f))
                             .setCancelable(false)
                             .setNegativeButton("ОК",
                                     new DialogInterface.OnClickListener() {
@@ -276,10 +304,29 @@ public class AppMainActivity extends ListActivity {
                                         }
                                     })
                             .show();
-                break;
-            default:
-                return super.onContextItemSelected(item);
+                    break;
+                default:
+                    return super.onContextItemSelected(item);
+            }
         }
         return true;
     }
+
+    @Override
+    public boolean onKeyDown(int keycode, KeyEvent event) {
+      if(keycode == KeyEvent.KEYCODE_BACK && !currentDirectory.getAbsolutePath().equals("/storage")) {
+          upOneLevel();
+            return true;
+
+        } else if(keycode == KeyEvent.KEYCODE_BACK && currentDirectory.getAbsolutePath().equals("/storage")) {
+          finish();
+
+          return false;
+      }else  if(keycode == KeyEvent.KEYCODE_MENU){
+
+          return  true;
+      }
+        return false;
+    }
+
 }
