@@ -17,46 +17,46 @@ public class FileManager {
     }
 
     public String getInfo(File f){
-        String str = "тип: ";
+        String str = "" + R.string.type;
         try {
             Boolean type = f.isFile();
-            str += (type?"Файл":"Папка");
+            str += (type?R.string.file:R.string.folder);
         }
         catch (Exception e){
-            str += "Ошибка при определении";
+            str += R.string.err_;
         }
-        str += "\nабсолютный путь: \n";
+        str += "\n"+R.string.absolutPath+"\n";
         try {
             str += f.getAbsolutePath();
         }
         catch (Exception e){
-            str += "Ошибка при определении";
+            str += R.string.err_;
         }
-        str += "\nдоступно для чтения: ";
+        str += "\n"+R.string.isRead;
         try {
             Boolean r = f.canRead();
-            str += (r? "да" : "нет");
+            str += (r? R.string.y : R.string.n);
         }
         catch (Exception e){
-            str += "Ошибка при определении";
+            str += R.string.err_;
         }
-        str += "\nдоступно для записи: ";
+        str += "\n"+R.string.isWrite;
         try {
             Boolean w = f.canWrite();
-            str += (w? "да" : "нет");
+            str += (w? R.string.y : R.string.n);
         }
         catch (Exception e){
-            str += "Ошибка при определении";
+            str += R.string.err_;
         }
-        str += "\nскрытый: ";
+        str += "\n"+R.string.isHidden;
         try {
             Boolean h = f.isHidden();
-            str += (h? "да" : "нет");
+            str += (h? R.string.y : R.string.n);
         }
         catch (Exception e){
-            str += "Ошибка при определении";
+            str += R.string.err_;
         }
-        str += "\nразмер: ";
+        str += "\n"+R.string.size;
         long zizeFileByte = 0;
         try {
             zizeFileByte = getDirectoryLength(f);
@@ -68,14 +68,14 @@ public class FileManager {
             else str += sizeK + "KB";
         }
         catch (Exception e){
-            str += "Ошибка при определении";
+            str += R.string.err_;
         }
-        str += "\nдата последней модификации: \n";
+        str += "\n"+R.string.date+"\n";
         try {
             str += new Date(f.lastModified()).toString();
         }
         catch (Exception e){
-            str += "Ошибка при определении";
+            str += R.string.err_;
         }
 
         return str;
@@ -142,13 +142,13 @@ public class FileManager {
             int len = files.length;
 
             if(!new File(dir).mkdir())
-                Log.e("mkdir", "Не удалось создать папку");
+                Log.e("mkdir", ""+R.string.noCrFold);
 
             for(int i = 0; i < len; i++)
                 paste(from + "/" + files[i], dir);
 
         } else if(!temp_dir.canWrite())
-            Log.e("canWrite", "Не для записи");
+            Log.e("canWrite", ""+R.string.noWrite);
 
     }
     public Boolean newFolder(File target, String name){

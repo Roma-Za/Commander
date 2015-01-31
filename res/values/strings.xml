@@ -1,4 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Commander</string>
+    <string name="info">Вся работа коммандера рассчитана на контекстное меню.
+        Так как контекстное меню можно вызвать только у элемента,
+        то для того чтобы вставить скопированный или вырезанный файл в папку нужно вызвать
+        контекстное меню у целевой папки долгим нажатием, и выбрать вставить,
+        файл появиться внутри той папки. Если вызвать контекстное меню у файла,
+        вставляемый файл в нём естественно не появиться, а появиться в текущей папке.
+        Те же правила работают и для создания новой папки.
+    </string>
+    <string name="searchM">Поиск</string>
+    <string name="hiddenM">Скрытые файлы</string>
+    <string name="aboutM">Информация</string>
+    <string name="exitM">Выход</string>
+    <string name="ok">Ок</string>
+    <string name="cancel">Отмена</string>
+    <string name="noOpen">Не могу открыть, неизвестный тип файла.</string>
+    <string name="confirm">Подтверждение</string>
+    <string name="doOpen">Хотите открыть файл </string>
+    <string name="menu">Меню</string>
+    <string name="n">Нет</string>
+    <string name="y">Да</string>
+    <string name="open">Открыть</string>
+    <string name="copy">Копировать</string>
+    <string name="cut">Вырезать</string>
+    <string name="paste">Вставить</string>
+    <string name="delete">Удалить</string>
+    <string name="rename">Переименовать</string>
+    <string name="newF">Новая папка</string>
+    <string name="okCancel">ок, отмена </string>
+    <string name="isDelete">Хотите удалить </string>
+    <string name="newFoldName">Создать папку с именем:</string>
+    <string name="noCrFold">Не удалось создать папку</string>
+    <string name="noName">Имя не подходит</string>
+    <string name="showHidFile">Показывать скрытые файлы?</string>
+    <string name="type">тип: </string>
+    <string name="file">Файл</string>
+    <string name="folder">Папка: </string>
+    <string name="err_">Ошибка при определении</string>
+    <string name="absolutPath">абсолютный путь</string>
+    <string name="isRead">доступно для чтения: </string>
+    <string name="isWrite">доступно для записи: </string>
+    <string name="isHidden">скрытый: </string>
+    <string name="size">размер: </string>
+    <string name="date">дата последней модификации: </string>
+    <string name="noWrite">не доступно для чтения.</string>
 </resources>

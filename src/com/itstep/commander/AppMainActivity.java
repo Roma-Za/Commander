@@ -2,8 +2,6 @@ package com.itstep.commander;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.LinkedList;
-
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.ActivityNotFoundException;
@@ -16,6 +14,7 @@ import android.os.Bundle;
 import android.view.*;
 import android.webkit.MimeTypeMap;
 import android.widget.*;
+import android.view.Menu;
 
 public class AppMainActivity extends ListActivity {
 
@@ -101,7 +100,7 @@ public class AppMainActivity extends ListActivity {
                     } catch (ActivityNotFoundException e) {
 
                         Toast.makeText(getApplicationContext(),
-                                "Couldn't open: unknown file type",
+                                R.string.noOpen,
                                 Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -112,10 +111,10 @@ public class AppMainActivity extends ListActivity {
             };
 
             new AlertDialog.Builder(this)
-                    .setTitle("Подтверждение")
-                    .setMessage("Хотите открыть файл " + aDirectory.getName() + "?")
-                    .setPositiveButton("Да", okButtonListener)
-                    .setNegativeButton("Нет", cancelButtonListener)
+                    .setTitle(R.string.confirm)
+                    .setMessage(R.string.doOpen + aDirectory.getName() + "?")
+                    .setPositiveButton(R.string.y, okButtonListener)
+                    .setNegativeButton(R.string.n, cancelButtonListener)
                     .show();
         }
     }
@@ -188,17 +187,16 @@ public class AppMainActivity extends ListActivity {
 
         AdapterView.AdapterContextMenuInfo aMenuInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
 
-        // Получаем позицию элемента в списке
         position = aMenuInfo.position;
-        menu.add(Menu.NONE, IDM_OPEN, Menu.NONE, "Открыть");
-        menu.add(Menu.NONE, IDM_COPY, Menu.NONE, "Копировать");
-        menu.add(Menu.NONE, IDM_CUT, Menu.NONE, "Вырезать");
-        menu.add(Menu.NONE, IDM_PASTE, Menu.NONE, "Вставить");
-        menu.add(Menu.NONE, IDM_DELETE, Menu.NONE, "Удалить");
-        menu.add(Menu.NONE, IDM_RENAME, Menu.NONE, "Переименовать");
-        menu.add(Menu.NONE, IDM_NEW, Menu.NONE, "Новая папка");
-        menu.add(Menu.NONE, IDM_INFO, Menu.NONE, "Инфо");
-        menu.setHeaderTitle("Меню");
+        menu.add(Menu.NONE, IDM_OPEN, Menu.NONE, R.string.open);
+        menu.add(Menu.NONE, IDM_COPY, Menu.NONE, R.string.copy);
+        menu.add(Menu.NONE, IDM_CUT, Menu.NONE, R.string.cut);
+        menu.add(Menu.NONE, IDM_PASTE, Menu.NONE, R.string.paste);
+        menu.add(Menu.NONE, IDM_DELETE, Menu.NONE, R.string.delete);
+        menu.add(Menu.NONE, IDM_RENAME, Menu.NONE, R.string.rename);
+        menu.add(Menu.NONE, IDM_NEW, Menu.NONE, R.string.newF);
+        menu.add(Menu.NONE, IDM_INFO, Menu.NONE, R.string.aboutM);
+        menu.setHeaderTitle(R.string.menu);
     }
 
     @Override
@@ -252,28 +250,28 @@ public class AppMainActivity extends ListActivity {
                         OnClickListener cancelButtonListener = new OnClickListener() {
                             public void onClick(DialogInterface arg0, int arg1) {
                                 Toast.makeText(getApplicationContext(),
-                                        "ок, отмена ",
+                                        R.string.okCancel,
                                         Toast.LENGTH_SHORT).show();
                             }
                         };
 
                         new AlertDialog.Builder(this)
-                                .setTitle("Подтверждение")
-                                .setMessage("Хотите удалить " + f.getName() + "?")
-                                .setPositiveButton("Да", okButtonListener)
-                                .setNegativeButton("Нет", cancelButtonListener)
+                                .setTitle(R.string.confirm)
+                                .setMessage(R.string.isDelete + f.getName() + "?")
+                                .setPositiveButton(R.string.y, okButtonListener)
+                                .setNegativeButton(R.string.n, cancelButtonListener)
                                 .show();
                     }
                     break;
                 case IDM_RENAME:
                     if(!(path.equals("/storage/sdcard0")) && !(path.equals("/storage/sdcard1"))) {
                         AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                        alert.setTitle("Переименование");
+                        alert.setTitle(R.string.rename);
                         final EditText input = new EditText(this);
                         input.setText(f.getName());
                         alert.setView(input);
 
-                        alert.setPositiveButton("ОК", new DialogInterface.OnClickListener() {
+                        alert.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 String value = input.getText().toString();
                                 String temp = f.getParent();
@@ -282,10 +280,10 @@ public class AppMainActivity extends ListActivity {
                             }
                         });
 
-                        alert.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                        alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 Toast.makeText(getApplicationContext(),
-                                        "ок, отмена ",
+                                        R.string.okCancel,
                                         Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -295,11 +293,11 @@ public class AppMainActivity extends ListActivity {
                     break;
                 case IDM_NEW:
                     AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                    alert.setTitle("Создать папку с именем:");
+                    alert.setTitle(R.string.newFoldName);
                     final EditText input = new EditText(this);
                     alert.setView(input);
 
-                    alert.setPositiveButton("ОК", new DialogInterface.OnClickListener() {
+                    alert.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
                                     String value = input.getText().toString();
                                     if (isTrueName(value, f)) {
@@ -307,7 +305,7 @@ public class AppMainActivity extends ListActivity {
                                             FileManager fm = new FileManager();
                                             if (!fm.newFolder(f, value)) {
                                                 Toast.makeText(getApplicationContext(),
-                                                        "Не удалось создать папку",
+                                                        R.string.noCrFold,
                                                         Toast.LENGTH_SHORT).show();
                                             }
                                             browseTo(f);
@@ -317,7 +315,7 @@ public class AppMainActivity extends ListActivity {
                                                 FileManager fm = new FileManager();
                                                 if (!fm.newFolder(PF, value)) {
                                                     Toast.makeText(getApplicationContext(),
-                                                            "Не удалось создать папку",
+                                                            R.string.noCrFold,
                                                             Toast.LENGTH_SHORT).show();
                                                 }
                                                 browseTo(PF);
@@ -325,16 +323,16 @@ public class AppMainActivity extends ListActivity {
                                         }
                                     } else {
                                         Toast.makeText(getApplicationContext(),
-                                                "Имя не подходит",
+                                                R.string.noName,
                                                 Toast.LENGTH_SHORT).show();
                                     }
                                 }
                     });
 
-                    alert.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                    alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
                             Toast.makeText(getApplicationContext(),
-                                    "ок, отмена ",
+                                    R.string.okCancel,
                                     Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -344,10 +342,10 @@ public class AppMainActivity extends ListActivity {
                     break;
                 case IDM_INFO:
                     new AlertDialog.Builder(this)
-                            .setTitle("Информация")
+                            .setTitle(R.string.aboutM)
                             .setMessage(new FileManager().getInfo(f))
                             .setCancelable(false)
-                            .setNegativeButton("ОК",
+                            .setNegativeButton(R.string.ok,
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
                                             dialog.cancel();
@@ -388,44 +386,31 @@ public class AppMainActivity extends ListActivity {
         return false;
     }
 
-    private int group1Id = 1;
-
-    int searchId = Menu.FIRST;
-    int hiddenId = Menu.FIRST +1;
-    int themeId = Menu.FIRST +2;
-    int aboutId = Menu.FIRST +3;
-    int exitId = Menu.FIRST +4;
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(group1Id, searchId, searchId, "Поиск");
-        menu.add(group1Id, hiddenId, hiddenId, "Скрытые файлы");
-        menu.add(group1Id, themeId, themeId, "Темы");
-        menu.add(group1Id, aboutId, aboutId, "О программе");
-        menu.add(group1Id, exitId, exitId, "Выход");
+        getMenuInflater().inflate(R.menu.main, menu);
 
-        return super.onCreateOptionsMenu(menu);
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
 
-            case 1:
+            case R.id.search:
 
                 return true;
 
-            case 2:
+            case R.id.hidden:
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Показывать скрытые файлы?");
-                alert.setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                alert.setTitle(R.string.showHidFile);
+                alert.setPositiveButton(R.string.y, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         setHiddenFlag(true);
                     }
                 });
 
-                alert.setNegativeButton("Нет", new DialogInterface.OnClickListener() {
+                alert.setNegativeButton(R.string.n, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         setHiddenFlag(false);
                     }
@@ -434,15 +419,22 @@ public class AppMainActivity extends ListActivity {
                 alert.show();
                 return true;
 
-            case 3:
+            case R.id.aboutId:
+                AlertDialog.Builder alertInfo = new AlertDialog.Builder(this);
+                alertInfo.setTitle(R.string.aboutM);
+                alertInfo.setMessage(R.string.info);
+                alertInfo.setCancelable(false);
+                alertInfo.setNegativeButton(R.string.ok,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
 
+                alertInfo.show();
                 return true;
 
-            case 4:
-
-                return true;
-
-            case 5:
+            case R.id.exitId:
                 finish();
                 return true;
             default:

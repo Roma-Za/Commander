@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+            android:id="@+id/search"
+            android:icon="@android:drawable/ic_menu_search"
+            android:showAsAction="ifRoom"
+            android:title="Поиск">
+    </item>
+    <item
+            android:id="@+id/hidden"
+            android:icon="@android:drawable/ic_menu_view"
+            android:showAsAction="ifRoom"
+            android:title="Скрытые файлы">
+    </item>
+    <item
+            android:id="@+id/aboutId"
+            android:icon="@android:drawable/ic_menu_info_details"
+            android:showAsAction="ifRoom"
+            android:title="О программе">
+    </item>
+    <item
+            android:id="@+id/exitId"
+            android:icon="@android:drawable/ic_delete"
+            android:showAsAction="ifRoom"
+            android:title="Выход">
+    </item>
+</menu>
