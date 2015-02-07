@@ -1,5 +1,6 @@
 package com.itstep.commander;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.*;
@@ -7,6 +8,10 @@ import java.util.Date;
 
 public class FileManager {
     private static final int BUFFER = 2048;
+    private Context context;
+    public FileManager(Context c){
+        context = c;
+    }
     public void delDirectory(File f){
         if (f.isDirectory()) {
             File[] arrPath = f.listFiles();
@@ -17,46 +22,46 @@ public class FileManager {
     }
 
     public String getInfo(File f){
-        String str = "" + R.string.type;
+        String str = context.getString(R.string.type);
         try {
             Boolean type = f.isFile();
-            str += (type?R.string.file:R.string.folder);
+            str += (type ? context.getString(R.string.file) : context.getString(R.string.folder));
         }
         catch (Exception e){
-            str += R.string.err_;
+            str += context.getString(R.string.err_);
         }
-        str += "\n"+R.string.absolutPath+"\n";
+        str += "\n"+context.getString(R.string.absolutPath)+"\n";
         try {
             str += f.getAbsolutePath();
         }
         catch (Exception e){
-            str += R.string.err_;
+            str += context.getString(R.string.err_);
         }
-        str += "\n"+R.string.isRead;
+        str += "\n"+context.getString(R.string.isRead);
         try {
             Boolean r = f.canRead();
-            str += (r? R.string.y : R.string.n);
+            str += (r ? context.getString(R.string.y) : context.getString(R.string.n));
         }
         catch (Exception e){
-            str += R.string.err_;
+            str += context.getString(R.string.err_);
         }
-        str += "\n"+R.string.isWrite;
+        str += "\n"+context.getString(R.string.isWrite);
         try {
             Boolean w = f.canWrite();
-            str += (w? R.string.y : R.string.n);
+            str += (w? context.getString(R.string.y) : context.getString(R.string.n));
         }
         catch (Exception e){
-            str += R.string.err_;
+            str += context.getString(R.string.err_);
         }
-        str += "\n"+R.string.isHidden;
+        str += "\n"+context.getString(R.string.isHidden);
         try {
             Boolean h = f.isHidden();
-            str += (h? R.string.y : R.string.n);
+            str += (h? context.getString(R.string.y) : context.getString(R.string.n));
         }
         catch (Exception e){
-            str += R.string.err_;
+            str += context.getString(R.string.err_);
         }
-        str += "\n"+R.string.size;
+        str += "\n"+context.getString(R.string.size);
         long zizeFileByte = 0;
         try {
             zizeFileByte = getDirectoryLength(f);
@@ -68,14 +73,14 @@ public class FileManager {
             else str += sizeK + "KB";
         }
         catch (Exception e){
-            str += R.string.err_;
+            str += context.getString(R.string.err_);
         }
-        str += "\n"+R.string.date+"\n";
+        str += "\n"+context.getString(R.string.date)+"\n";
         try {
             str += new Date(f.lastModified()).toString();
         }
         catch (Exception e){
-            str += R.string.err_;
+            str += context.getString(R.string.err_);
         }
 
         return str;
@@ -142,13 +147,13 @@ public class FileManager {
             int len = files.length;
 
             if(!new File(dir).mkdir())
-                Log.e("mkdir", ""+R.string.noCrFold);
+                Log.e("mkdir", ""+context.getString(R.string.noCrFold));
 
             for(int i = 0; i < len; i++)
                 paste(from + "/" + files[i], dir);
 
         } else if(!temp_dir.canWrite())
-            Log.e("canWrite", ""+R.string.noWrite);
+            Log.e("canWrite", ""+context.getString(R.string.noWrite));
 
     }
     public Boolean newFolder(File target, String name){

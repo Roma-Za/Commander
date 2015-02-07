@@ -4,11 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
-import android.content.Intent;
+import android.content.*;
 import android.content.DialogInterface.OnClickListener;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
@@ -37,11 +34,12 @@ public class AppMainActivity extends ListActivity {
     private static final String PREFS_NAME = "ManagerPrefsFile";
     private static final String PREFS_HIDDEN = "hidden";
     private Boolean isShowHidden = false;
+    private Context cntx;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-
+        cntx = this;
         if(getLastNonConfigurationInstance()!=null)
             currentDirectory = (File)getLastNonConfigurationInstance();
 
@@ -100,7 +98,7 @@ public class AppMainActivity extends ListActivity {
                     } catch (ActivityNotFoundException e) {
 
                         Toast.makeText(getApplicationContext(),
-                                R.string.noOpen,
+                                getString(R.string.noOpen),
                                 Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -112,7 +110,7 @@ public class AppMainActivity extends ListActivity {
 
             new AlertDialog.Builder(this)
                     .setTitle(R.string.confirm)
-                    .setMessage(R.string.doOpen + aDirectory.getName() + "?")
+                    .setMessage(getString(R.string.doOpen) +" "+ aDirectory.getName() + "?")
                     .setPositiveButton(R.string.y, okButtonListener)
                     .setNegativeButton(R.string.n, cancelButtonListener)
                     .show();
@@ -223,7 +221,7 @@ public class AppMainActivity extends ListActivity {
                     break;
                 case IDM_PASTE:
                     if(!(path.equals("/storage/sdcard0")) && !(path.equals("/storage/sdcard1"))) {
-                        FileManager fm = new FileManager();
+                        FileManager fm = new FileManager(cntx);
                         if (f.isDirectory()) {
                             fm.paste(PathFrom, path);
                             browseTo(f);
@@ -241,7 +239,7 @@ public class AppMainActivity extends ListActivity {
                             public void onClick(DialogInterface arg0, int arg1) {
 
                                 File temp = f.getParentFile();
-                                FileManager fm = new FileManager();
+                                FileManager fm = new FileManager(cntx);
                                 fm.delDirectory(f);
                                 browseTo(temp);
                             }
@@ -257,7 +255,7 @@ public class AppMainActivity extends ListActivity {
 
                         new AlertDialog.Builder(this)
                                 .setTitle(R.string.confirm)
-                                .setMessage(R.string.isDelete + f.getName() + "?")
+                                .setMessage(getString(R.string.isDelete) +" "+ f.getName() + "?")
                                 .setPositiveButton(R.string.y, okButtonListener)
                                 .setNegativeButton(R.string.n, cancelButtonListener)
                                 .show();
@@ -302,7 +300,7 @@ public class AppMainActivity extends ListActivity {
                                     String value = input.getText().toString();
                                     if (isTrueName(value, f)) {
                                         if (f.isDirectory()) {
-                                            FileManager fm = new FileManager();
+                                            FileManager fm = new FileManager(cntx);
                                             if (!fm.newFolder(f, value)) {
                                                 Toast.makeText(getApplicationContext(),
                                                         R.string.noCrFold,
@@ -312,7 +310,7 @@ public class AppMainActivity extends ListActivity {
                                         } else {
                                             File PF = f.getParentFile();
                                             if (isTrueName(value, PF)) {
-                                                FileManager fm = new FileManager();
+                                                FileManager fm = new FileManager(cntx);
                                                 if (!fm.newFolder(PF, value)) {
                                                     Toast.makeText(getApplicationContext(),
                                                             R.string.noCrFold,
@@ -343,7 +341,7 @@ public class AppMainActivity extends ListActivity {
                 case IDM_INFO:
                     new AlertDialog.Builder(this)
                             .setTitle(R.string.aboutM)
-                            .setMessage(new FileManager().getInfo(f))
+                            .setMessage(new FileManager(cntx).getInfo(f))
                             .setCancelable(false)
                             .setNegativeButton(R.string.ok,
                                     new DialogInterface.OnClickListener() {

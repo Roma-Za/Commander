@@ -36,9 +36,9 @@
     <string name="showHidFile">Показывать скрытые файлы?</string>
     <string name="type">тип: </string>
     <string name="file">Файл</string>
-    <string name="folder">Папка: </string>
+    <string name="folder">Папка </string>
     <string name="err_">Ошибка при определении</string>
-    <string name="absolutPath">абсолютный путь</string>
+    <string name="absolutPath">Абсолютный путь</string>
     <string name="isRead">доступно для чтения: </string>
     <string name="isWrite">доступно для записи: </string>
     <string name="isHidden">скрытый: </string>
