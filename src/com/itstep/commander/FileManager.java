@@ -22,68 +22,77 @@ public class FileManager {
     }
 
     public String getInfo(File f){
-        String str = context.getString(R.string.type);
+        StringBuilder sb = new StringBuilder();
+       sb.append(context.getString(R.string.type));
         try {
             Boolean type = f.isFile();
-            str += (type ? context.getString(R.string.file) : context.getString(R.string.folder));
+            sb.append(type ? context.getString(R.string.file) : context.getString(R.string.folder));
         }
         catch (Exception e){
-            str += context.getString(R.string.err_);
+            sb.append(context.getString(R.string.err_));
         }
-        str += "\n"+context.getString(R.string.absolutPath)+"\n";
+        sb.append("\n");
+        sb.append(context.getString(R.string.absolutPath));
+        sb.append("\n");
         try {
-            str += f.getAbsolutePath();
+            sb.append(f.getAbsolutePath());
         }
         catch (Exception e){
-            str += context.getString(R.string.err_);
+            sb.append(context.getString(R.string.err_));
         }
-        str += "\n"+context.getString(R.string.isRead);
+        sb.append("\n");
+        sb.append(context.getString(R.string.isRead));
         try {
             Boolean r = f.canRead();
-            str += (r ? context.getString(R.string.y) : context.getString(R.string.n));
+            sb.append(r ? context.getString(R.string.y) : context.getString(R.string.n));
         }
         catch (Exception e){
-            str += context.getString(R.string.err_);
+           sb.append(context.getString(R.string.err_));
         }
-        str += "\n"+context.getString(R.string.isWrite);
+        sb.append("\n");
+        sb.append(context.getString(R.string.isWrite));
         try {
             Boolean w = f.canWrite();
-            str += (w? context.getString(R.string.y) : context.getString(R.string.n));
+           sb.append(w? context.getString(R.string.y) : context.getString(R.string.n));
         }
         catch (Exception e){
-            str += context.getString(R.string.err_);
+            sb.append(context.getString(R.string.err_));
         }
-        str += "\n"+context.getString(R.string.isHidden);
+        sb.append("\n");
+        sb.append(context.getString(R.string.isHidden));
         try {
             Boolean h = f.isHidden();
-            str += (h? context.getString(R.string.y) : context.getString(R.string.n));
+           sb.append(h? context.getString(R.string.y) : context.getString(R.string.n));
         }
         catch (Exception e){
-            str += context.getString(R.string.err_);
+            sb.append(context.getString(R.string.err_));
         }
-        str += "\n"+context.getString(R.string.size);
+        sb.append("\n");
+        sb.append(context.getString(R.string.size));
         long zizeFileByte = 0;
         try {
             zizeFileByte = getDirectoryLength(f);
             float sizeK = zizeFileByte/1024f;
             float sizeM = zizeFileByte/1024f/1024f;
             float sizeG = zizeFileByte/1024f/1024f/1024f;
-            if(sizeG > 1) str += sizeG + "GB";
-            else if(sizeM > 1) str += sizeM + "MB";
-            else str += sizeK + "KB";
+            if(sizeG > 1) sb.append(sizeG + "GB");
+            else if(sizeM > 1) sb.append(sizeM + "MB");
+            else sb.append(sizeK + "KB");
         }
         catch (Exception e){
-            str += context.getString(R.string.err_);
+            sb.append(context.getString(R.string.err_));
         }
-        str += "\n"+context.getString(R.string.date)+"\n";
+        sb.append("\n");
+        sb.append(context.getString(R.string.date));
+        sb.append("\n");
         try {
-            str += new Date(f.lastModified()).toString();
+            sb.append(new Date(f.lastModified()).toString());
         }
         catch (Exception e){
-            str += context.getString(R.string.err_);
+           sb.append(context.getString(R.string.err_));
         }
 
-        return str;
+        return sb.toString();
     }
 
     private long getDirectoryLength(File f){
